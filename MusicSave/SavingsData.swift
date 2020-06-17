@@ -7,47 +7,57 @@
 //
 
 import UIKit
+import CoreData
 
-class SavingsData: NSObject, NSCoding {
+
+class SavingsData: NSObject {
     
-    func encode(with coder: NSCoder) {
-        // do nothing
-    }
+//    func encode(with coder: NSCoder) {
+//        // do nothing
+//    }
     
     
     var dollarsPerHour:Double?
     var numberOfHours:Double?
     var amountSaved:Double
+    var totalSaved:Double
     var dateOfUpdate:Date
+    var instrument:String
     
-    init(dollarsPerHour: Double?, numbersOfHours: Double?, amountSaved: Double, dateOfUpdate: Date)
+    init(withNumberOfHours: Double, andDollarsPerHours:Double, andAmountSaved:Double, andTotalSaved:Double, withInstrument:String, onDate:Date)
     {
-        self.dollarsPerHour = dollarsPerHour
-        self.numberOfHours = numbersOfHours
-        self.amountSaved = amountSaved
-        self.dateOfUpdate = dateOfUpdate
+        self.dollarsPerHour = andDollarsPerHours;
+        self.numberOfHours = withNumberOfHours;
+        self.amountSaved = andAmountSaved;
+        self.totalSaved = andTotalSaved;
+        self.instrument = withInstrument;
+        self.dateOfUpdate = onDate;
     }
     
     init(withNumberOfHours: Double, andDollarsPerHours:Double, andCurrentSavings:[SavingsData], onDate:Date)
     {
-        dollarsPerHour = andDollarsPerHours;
-        numberOfHours = withNumberOfHours;
+        self.dollarsPerHour = andDollarsPerHours;
+        self.numberOfHours = withNumberOfHours;
+        self.amountSaved = self.dollarsPerHour! * self.numberOfHours!
         if andCurrentSavings.count > 0
         {
-            amountSaved = andCurrentSavings.last!.amountSaved + dollarsPerHour! * numberOfHours!
+            self.totalSaved = andCurrentSavings.last!.totalSaved + self.dollarsPerHour! * self.numberOfHours!
         }
         else
         {
-            amountSaved = dollarsPerHour! * numberOfHours!
+            self.totalSaved = self.amountSaved
         }
         
-        dateOfUpdate = onDate;
+        self.dateOfUpdate = onDate;
+        self.instrument = "Guitar"
     }
     
     init(withResetOnDate:Date)
     {
-        amountSaved = 0
-        dateOfUpdate = withResetOnDate
+        self.totalSaved = 0.0
+        self.amountSaved = 0.0
+        self.dateOfUpdate = withResetOnDate
+        self.instrument = "RESET VALUES"
     }
     
     override var description: String
@@ -63,7 +73,7 @@ class SavingsData: NSObject, NSCoding {
         {
             savingsDescription = "You played for \(numberOfHours!) hours, at $\(dollarsPerHour!) per hour\n"
             //CHECK//savingsDescription = savingsDescription + "Total saved: $\(amountSaved) as at \(dateOfUpdate.description(NSLocale.current))"
-            savingsDescription = savingsDescription + "Total saved: $\(amountSaved) as at \(dateOfUpdate.description)"
+            savingsDescription = savingsDescription + "Total saved: $\(String(describing: amountSaved)) as at \(dateOfUpdate.description)"
         }
         
         return savingsDescription
@@ -108,16 +118,16 @@ class SavingsData: NSObject, NSCoding {
     return totalTime
     }
     
-    static func AmountSaved(savings:[SavingsData]) -> Double
+    static func TotalAmountSaved(savings:[SavingsData]) -> Double
     {
-        var amountSaved = 0.0
+        var totalAmountSaved = 0.0
         
         if !savings.isEmpty
         {
-            amountSaved = savings.last!.amountSaved
+            totalAmountSaved = savings.last!.totalSaved
         }
         
-        return amountSaved
+        return totalAmountSaved
     }
     
     static func OutputCSV(savings:[SavingsData]) -> String
@@ -127,7 +137,7 @@ class SavingsData: NSObject, NSCoding {
         dateFormatter.dateFormat = "dd/MM/YYYY HH:mm:ss"
         
         // create CSV file in memory
-        csv = "\"DateTime\",\"NumberOfHours\",\"DollarsPerHour\",\"TotalSaved\"\n"
+        csv = "\"DateTime\",\"Instrument\",\"NumberOfHours\",\"DollarsPerHour\",\"AmountSaved\",\"TotalSaved\"\n"
         
         if savings.count != 0
         {
@@ -135,6 +145,8 @@ class SavingsData: NSObject, NSCoding {
             {
                 let dateString = dateFormatter.string(from: row.dateOfUpdate)
                 csv = csv + "\"\(dateString)\","
+                
+                csv = csv + "\"\(row.instrument)\","
 
                 if let tempVal = row.numberOfHours
                 {
@@ -154,7 +166,9 @@ class SavingsData: NSObject, NSCoding {
                     csv = csv + "0.0,"
                 }
                 
-                csv = csv + "\(row.amountSaved)\n"
+                csv = csv + "\(String(describing: row.amountSaved)),"
+                
+                csv = csv + "\(String(describing: row.totalSaved))\n"
             }
         }
         
@@ -173,71 +187,13 @@ class SavingsData: NSObject, NSCoding {
         return csv
     }
     
-    // MARK: - Conform to NSCoding
-    func encodeWithCoder(aCoder: NSCoder)
-    {
-        print("encodeWithCoder")
-        aCoder.encode(dollarsPerHour, forKey: "dollarsPerHour")
-        aCoder.encode(numberOfHours, forKey: "numberOfHours")
-        aCoder.encode(amountSaved, forKey: "amountSaved")
-        aCoder.encode(dateOfUpdate, forKey: "dateOfUpdate")
-    }
-    
-    // since we inherit from NSObject, we're not a final class -> therefore this initializer must be declared as 'required'
-    // it also must be declared as a 'convenience' initializer, because we still have a designated initializer as well
-    required convenience init?(coder aDecoder: NSCoder)
-    {
-        print("decodeWithCoder")
-        guard let unarchivedDPH = aDecoder.decodeObject(forKey: "dollarsPerHour") as? Double?
-            else {
-                return nil
-        }
-        guard let unarchivedNOH = aDecoder.decodeObject(forKey: "numberOfHours") as? Double?
-            else {
-                return nil
-        }
-        guard let unarchivedAS = aDecoder.decodeObject(forKey: "amountSaved") as? Double
-            else {
-                return nil
-        }
-        guard let unarchivedDOU = aDecoder.decodeObject(forKey: "dateOfUpdate") as? Date
-            else {
-                return nil
-        }
-        
-        NSLog("\(String(describing: unarchivedDPH)) and \(String(describing: unarchivedNOH)) and \(unarchivedAS) and \(unarchivedDOU)")
-        // now (we must) call the designated initializer
-        self.init(dollarsPerHour: unarchivedDPH, numbersOfHours: unarchivedNOH, amountSaved: unarchivedAS, dateOfUpdate: unarchivedDOU)
-    }
-
     private class func getFileURL(fileName: String) -> URL
     {
         //let FILE_NAME = "SavingsDataArray"
         let documentsDirectory = FileManager().urls(for: .documentDirectory, in: .userDomainMask).first!
         let archiveURL = documentsDirectory.appendingPathComponent(fileName)
-        
+
         return archiveURL
     }
-    
-    class func saveData(savings: [SavingsData])
-    {
-        // takes savings array and writes it to file
-        
-        let success = NSKeyedArchiver.archiveRootObject(savings, toFile: SavingsData.getFileURL(fileName: "SavingsDataArray").path)
-        if success
-        {
-            NSLog("You did it! File saved")
-        }
-        else
-        {
-            NSLog("Boo! File failed to save")
-        }
-    }
-    
-    class func loadData() -> [SavingsData]?
-    {
-        return NSKeyedUnarchiver.unarchiveObject(withFile: SavingsData.getFileURL(fileName: "SavingsDataArray").path) as? [SavingsData]
-    }
-
 
 }

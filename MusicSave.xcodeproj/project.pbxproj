@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D81A3ABB2499F75F004D4369 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D81A3ABA2499F75F004D4369 /* CoreData.framework */; };
 		D88AF3BD1C7A6B9700A202BA /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D88AF3BC1C7A6B9700A202BA /* AppDelegate.swift */; };
 		D88AF3BF1C7A6B9700A202BA /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D88AF3BE1C7A6B9700A202BA /* ViewController.swift */; };
 		D88AF3C21C7A6B9700A202BA /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D88AF3C01C7A6B9700A202BA /* Main.storyboard */; };
@@ -28,6 +29,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		D81A3ABA2499F75F004D4369 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
 		D88AF3B91C7A6B9700A202BA /* MusicSave.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MusicSave.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D88AF3BC1C7A6B9700A202BA /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D88AF3BE1C7A6B9700A202BA /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -47,6 +49,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D81A3ABB2499F75F004D4369 /* CoreData.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -60,12 +63,21 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		D81A3AB92499F75F004D4369 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				D81A3ABA2499F75F004D4369 /* CoreData.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		D88AF3B01C7A6B9700A202BA = {
 			isa = PBXGroup;
 			children = (
 				D88AF3BB1C7A6B9700A202BA /* MusicSave */,
 				D88AF3D31C7A6B9800A202BA /* MusicSaveTests */,
 				D88AF3BA1C7A6B9700A202BA /* Products */,
+				D81A3AB92499F75F004D4369 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -153,6 +165,7 @@
 					D88AF3B81C7A6B9700A202BA = {
 						CreatedOnToolsVersion = 7.2.1;
 						DevelopmentTeam = M5NY42236V;
+						LastSwiftMigration = 1150;
 					};
 					D88AF3CF1C7A6B9800A202BA = {
 						CreatedOnToolsVersion = 7.2.1;
@@ -296,7 +309,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -345,7 +358,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
@@ -358,11 +371,17 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				INFOPLIST_FILE = MusicSave/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = edu.self.MusicSave;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_OBJC_BRIDGING_HEADER = "";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_PRECOMPILE_BRIDGING_HEADER = NO;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
@@ -370,11 +389,16 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				INFOPLIST_FILE = MusicSave/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = edu.self.MusicSave;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_OBJC_BRIDGING_HEADER = "";
+				SWIFT_PRECOMPILE_BRIDGING_HEADER = NO;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};

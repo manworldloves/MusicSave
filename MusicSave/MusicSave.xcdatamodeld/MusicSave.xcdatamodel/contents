@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="9525" systemVersion="15D21" minimumToolsVersion="Automatic">
-    <entity name="Savings" syncable="YES">
-        <attribute name="totalSaved" optional="YES" attributeType="Double" minValueString="0" defaultValueString="0.0" syncable="YES"/>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="16119" systemVersion="19F101" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="SavingsModel" representedClassName="SavingsModel" syncable="YES" codeGenerationType="class">
+        <attribute name="amountSaved" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO"/>
+        <attribute name="dateOfUpdate" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="dollarsPerHour" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO"/>
+        <attribute name="instrument" optional="YES" attributeType="String"/>
+        <attribute name="numberOfHours" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO"/>
+        <attribute name="totalSaved" optional="YES" attributeType="Double" minValueString="0" defaultValueString="0.0" usesScalarValueType="NO"/>
     </entity>
     <elements>
-        <element name="Savings" positionX="-63" positionY="-18" width="128" height="60"/>
+        <element name="SavingsModel" positionX="-63" positionY="-18" width="128" height="133"/>
     </elements>
 </model>

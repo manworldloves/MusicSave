@@ -10,11 +10,11 @@
 //      2. Practice (hrs and mins) since last clear (date)
 //      4. set up SavingsData class
 //      3. Log file capturing date, delta change and running total
+//      5. Work out a better way of saving data on exit - ie using AppDelegate - because I can't get [savings] into app delegate function - THIS IS NOT WORKING
+//      6. Swap to CoreData (or whatever the latest thing is)
 //
 //  To do:
-//      5. Work out a better way of saving data on exit - ie using AppDelegate - because I can't get [savings] into app delegate function - THIS IS NOT WORKING
-//
-//      6. Swap to CoreData (or whatever the latest thing is)
+
 //      7. Add another screen for adding data
 //      8. Include instrument type options
 //      9. Historical displays of usage - bar chart
@@ -38,38 +38,41 @@ class ViewController: UIViewController, MFMailComposeViewControllerDelegate {
     // MARK: Variables
     var lastReset = Date()
     var totalPractice = 0.0
-    var amountSaved = 0.0 as NSNumber
+    var totalAmountSaved = 0.0 as NSNumber
     
-    var savings:[SavingsData] = []
+    var savings: [SavingsData] = []
+    
+    var history: [NSManagedObject] = []
 
     // MARK: Functions
     override func viewDidLoad()
     {
         super.viewDidLoad()
         
-        // temp initialiser - to be removed after testing
-        /*lastReset = initDateFromDateString("01-02-2016")
+        //MARK: DEBUG
+        let deleteAll = false
         
-        savings.append(SavingsData(withResetOnDate: lastReset))
-        savings.append(SavingsData(withNumberOfHours: 6.0, andDollarsPerHours: dollarsPerHour, andCurrentSavings: savings, onDate: initDateFromDateString("02-02-2016")))
-        SavingsData.saveData(savings)
-        */
+        if (deleteAll) {
+            let delegate = UIApplication.shared.delegate as! AppDelegate
+            let context = delegate.persistentContainer.viewContext
+            let fetchRequest: NSFetchRequest<NSFetchRequestResult> = SavingsModel.fetchRequest()
+            let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
+            try? context.execute(deleteRequest)
+            
+            
+        }
         
         // load data - if file doesn't exist create clear record
-        if let attemptSavingsLoad = SavingsData.loadData()
-        {
-            savings = attemptSavingsLoad
-        }
-        else
-        {
+        savings = loadData()
+        if savings.count == 0 {
             savings.append(SavingsData(withResetOnDate: Date()))
+            try? saveData(newData: savings[0])
         }
         
-        NSLog("Entry count: \(savings.count)")
+        NSLog("Existing record count: \(savings.count)")
         
         // update displays
         updateDisplay()
-        
     }
 
     func updateDisplay() {
@@ -80,12 +83,12 @@ class ViewController: UIViewController, MFMailComposeViewControllerDelegate {
         let historyText = "Since \(dateString(date: lastReset)),\nYou have practiced for\n\(daysHoursMinutes(inputHours: totalPractice))"
         labelHistory.text = historyText
         
-        amountSaved = SavingsData.AmountSaved(savings: savings) as NSNumber
+        totalAmountSaved = SavingsData.TotalAmountSaved(savings: savings) as NSNumber
         
         let formatter = NumberFormatter()
         formatter.numberStyle = .currency
         //formatter.numberStyle = .CurrencyStyle
-        labelAmountSaved.text = formatter.string(from: amountSaved)!
+        labelAmountSaved.text = formatter.string(from: totalAmountSaved)!
     }
     
     override func didReceiveMemoryWarning() {
@@ -111,7 +114,9 @@ class ViewController: UIViewController, MFMailComposeViewControllerDelegate {
                     NSLog(self.savings.last!.description)
                     
                     self.updateDisplay()
-                    SavingsData.saveData(savings: self.savings)
+                    
+                    // save data
+                    try? self.saveData(newData: newSavingAmount)
                 }
         })
         
@@ -143,7 +148,15 @@ class ViewController: UIViewController, MFMailComposeViewControllerDelegate {
                 NSLog(self.savings.last!.description)
                 
                 self.updateDisplay()
-                SavingsData.saveData(savings: self.savings)
+                
+                // save data
+                do {
+                    try self.saveData(newData: newReset)
+                }
+                catch {
+                    debugPrint(error)
+                }
+                
                 
             })
         
@@ -172,6 +185,56 @@ class ViewController: UIViewController, MFMailComposeViewControllerDelegate {
         
         NSLog("\(csv)")
         
+    }
+    
+    // MARK: CoreData functions
+    func saveData(newData: SavingsData) throws {
+        let delegate = UIApplication.shared.delegate as! AppDelegate
+        let context = delegate.persistentContainer.viewContext
+        //context.automaticallyMergesChangesFromParent = true
+        
+        let newSaving = SavingsModel(entity: SavingsModel.entity(), insertInto: context)
+        newSaving.amountSaved = newData.amountSaved as NSNumber
+        newSaving.dateOfUpdate = newData.dateOfUpdate
+        newSaving.dollarsPerHour = newData.dollarsPerHour as NSNumber?
+        newSaving.instrument = newData.instrument
+        newSaving.numberOfHours = newData.numberOfHours as NSNumber?
+        newSaving.totalSaved = newData.totalSaved as NSNumber
+        
+        try context.save()
+        
+        NSLog("New record saved!")
+    }
+    
+    func loadData() -> [SavingsData] {
+        let delegate = UIApplication.shared.delegate as! AppDelegate
+        let context = delegate.persistentContainer.viewContext
+        //let fetchRequest: NSFetchRequest<SavingsData> = NSManagedObject.fetchRequest()
+        
+        let fetchRequest: NSFetchRequest<SavingsModel> = SavingsModel.fetchRequest()
+        fetchRequest.returnsObjectsAsFaults = false
+        var savings: [SavingsData] = []
+        do {
+            let results = try context.fetch(fetchRequest) as [SavingsModel]
+
+            NSLog("Number of saved records: \(results.count)")
+            //return results as! [SavingsData]
+            
+            for r in results {
+                let dph = r.dollarsPerHour ?? 0.0
+                let noh = r.numberOfHours ?? 0.0
+                let amsv = r.amountSaved ?? 0.0
+                let dou = r.dateOfUpdate ?? Date()
+                let inst = r.instrument ?? "Guitar"
+                let totsv = r.totalSaved ?? 0.0
+                
+                savings.append(SavingsData(withNumberOfHours: Double(truncating: noh), andDollarsPerHours: Double(truncating: dph), andAmountSaved: Double(truncating: amsv), andTotalSaved: Double(truncating: totsv), withInstrument: inst, onDate: dou))
+            }
+        }
+        catch {
+            debugPrint(error)
+        }
+        return savings
     }
     
     
@@ -204,7 +267,7 @@ class ViewController: UIViewController, MFMailComposeViewControllerDelegate {
         return dateFormatter.date(from: dateString)!
     }
     
-    // mail a file
+    // MARK: Mail a file
     func configuredMailComposeViewController(data:Data) -> MFMailComposeViewController
     {
         let emailController = MFMailComposeViewController()
